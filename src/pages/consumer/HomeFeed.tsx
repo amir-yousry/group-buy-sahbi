@@ -30,6 +30,7 @@ const PRICE_MAX = 10000;
 export default function HomeFeed() {
   const { user } = useAuth();
   const [groups, setGroups] = useState<Group[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<SortMode>("ending-soon");
   const [category, setCategory] = useState("الكل");
@@ -41,7 +42,12 @@ export default function HomeFeed() {
   const [filterOpen, setFilterOpen] = useState(false);
 
   useEffect(() => {
-    setGroups(getGroups());
+    // Tiny artificial delay so the skeleton is visible on first paint
+    const t = setTimeout(() => {
+      setGroups(getGroups());
+      setLoading(false);
+    }, 250);
+    return () => clearTimeout(t);
   }, []);
 
   const usersById = useMemo(() => {

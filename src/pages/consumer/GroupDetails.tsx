@@ -35,6 +35,8 @@ export default function GroupDetails() {
   const navigate = useNavigate();
   const [group, setGroup] = useState<Group | undefined>();
   const [showJoin, setShowJoin] = useState(false);
+  const [activeImage, setActiveImage] = useState(0);
+  const [favorited, setFavorited] = useState(false);
 
   const refresh = () => {
     if (id) setGroup(getGroupById(id));

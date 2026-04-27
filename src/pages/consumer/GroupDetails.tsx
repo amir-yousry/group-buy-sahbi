@@ -8,7 +8,10 @@ import {
   Package,
   ShieldCheck,
   CheckCircle2,
+  Share2,
+  Heart,
 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { ProgressBar } from "@/components/shared/ProgressBar";
 import { Countdown } from "@/components/shared/Countdown";

@@ -358,3 +358,28 @@ function SortChip({
     </button>
   );
 }
+
+function FilterChip({
+  label,
+  icon,
+  onRemove,
+}: {
+  label: string;
+  icon?: React.ReactNode;
+  onRemove: () => void;
+}) {
+  return (
+    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20 animate-bounce-in">
+      {icon}
+      {label}
+      <button
+        type="button"
+        onClick={onRemove}
+        className="hover:bg-primary/20 rounded-full p-0.5 -ml-1"
+        aria-label="إزالة الفلتر"
+      >
+        <X className="w-3 h-3" />
+      </button>
+    </span>
+  );
+}

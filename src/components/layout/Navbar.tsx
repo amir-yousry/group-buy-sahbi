@@ -100,7 +100,7 @@ export function Navbar() {
                   key={item.to}
                   to={item.to}
                   className={cn(
-                    "flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                    "relative flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200",
                     active
                       ? "bg-primary text-primary-foreground shadow-sm"
                       : "text-foreground hover:bg-muted"
@@ -108,6 +108,11 @@ export function Navbar() {
                 >
                   <item.icon className="w-4 h-4" />
                   {item.label}
+                  {item.badge > 0 && (
+                    <span className="ms-0.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold animate-bounce-in">
+                      {item.badge > 99 ? "99+" : item.badge}
+                    </span>
+                  )}
                 </Link>
               );
             })}

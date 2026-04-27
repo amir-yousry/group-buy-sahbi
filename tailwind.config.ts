@@ -122,6 +122,7 @@ export default {
         "fade-in-up": "fade-in-up 0.4s ease-out",
         "scale-in": "scale-in 0.3s ease-out",
         "pulse-glow": "pulse-glow 2s ease-in-out infinite",
+        "shimmer": "shimmer 2s linear infinite",
       },
     },
   },

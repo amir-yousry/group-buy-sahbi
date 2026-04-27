@@ -8,6 +8,8 @@ import {
   Package,
   ShieldCheck,
   CheckCircle2,
+  Share2,
+  Heart,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProgressBar } from "@/components/shared/ProgressBar";
@@ -33,6 +35,8 @@ export default function GroupDetails() {
   const navigate = useNavigate();
   const [group, setGroup] = useState<Group | undefined>();
   const [showJoin, setShowJoin] = useState(false);
+  const [activeImage, setActiveImage] = useState(0);
+  const [favorited, setFavorited] = useState(false);
 
   const refresh = () => {
     if (id) setGroup(getGroupById(id));
@@ -95,25 +99,64 @@ export default function GroupDetails() {
     return { text: "انضم للمجموعة", disabled: false };
   })();
 
+  const onShare = async () => {
+    const url = window.location.href;
+    const shareData = { title: group.title, text: `صفقة جماعية: ${group.title}`, url };
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(url);
+        toast.success("تم نسخ رابط المجموعة");
+      }
+    } catch {
+      // user dismissed share — no-op
+    }
+  };
+
+  const onFavorite = () => {
+    setFavorited((f) => !f);
+    toast.success(favorited ? "تمت الإزالة من المفضلة" : "تمت إضافتها للمفضلة");
+  };
+
   return (
-    <div className="container max-w-5xl py-6 pb-32">
-      {/* Back */}
-      <button
-        onClick={() => navigate(-1)}
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4"
-      >
-        <ArrowRight className="w-4 h-4" />
-        رجوع
-      </button>
+    <div className="container max-w-5xl py-6 pb-32 animate-fade-in-up">
+      {/* Back + actions */}
+      <div className="flex items-center justify-between mb-4">
+        <button
+          onClick={() => navigate(-1)}
+          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ArrowRight className="w-4 h-4" />
+          رجوع
+        </button>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={onFavorite}
+            aria-label="حفظ في المفضلة"
+            className="p-2 rounded-full hover:bg-muted transition-colors"
+          >
+            <Heart className={`w-5 h-5 transition-all ${favorited ? "fill-destructive text-destructive scale-110" : "text-muted-foreground"}`} />
+          </button>
+          <button
+            onClick={onShare}
+            aria-label="مشاركة"
+            className="p-2 rounded-full hover:bg-muted transition-colors"
+          >
+            <Share2 className="w-5 h-5 text-muted-foreground" />
+          </button>
+        </div>
+      </div>
 
       <div className="grid lg:grid-cols-5 gap-6 lg:gap-8">
         {/* Image gallery */}
-        <div className="lg:col-span-2">
-          <div className="relative aspect-square bg-muted rounded-2xl overflow-hidden border border-border">
+        <div className="lg:col-span-2 space-y-3">
+          <div className="relative aspect-square bg-muted rounded-2xl overflow-hidden border border-border shadow-card">
             <img
-              src={group.images[0]}
+              src={group.images[activeImage] ?? group.images[0]}
               alt={group.title}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover animate-fade-in-up"
+              key={activeImage}
             />
             {discount > 0 && (
               <div className="absolute top-4 left-4 bg-gradient-accent text-accent-foreground font-extrabold px-3 py-1.5 rounded-full shadow-accent-glow">
@@ -124,6 +167,23 @@ export default function GroupDetails() {
               <GroupStatusBadge status={group.status} />
             </div>
           </div>
+          {group.images.length > 1 && (
+            <div className="flex gap-2 overflow-x-auto no-scrollbar">
+              {group.images.map((img, i) => (
+                <button
+                  key={i}
+                  onClick={() => setActiveImage(i)}
+                  className={`shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 transition-all ${
+                    activeImage === i
+                      ? "border-primary shadow-sm scale-105"
+                      : "border-transparent opacity-70 hover:opacity-100"
+                  }`}
+                >
+                  <img src={img} alt="" className="w-full h-full object-cover" />
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Details */}

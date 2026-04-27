@@ -54,7 +54,9 @@ export default function ChatList() {
                 <Link
                   key={c.id}
                   to={`/chats/${c.id}`}
-                  className="surface-card p-3 flex items-center gap-3 hover:shadow-elevated transition-shadow"
+                  className={`surface-card p-3 flex items-center gap-3 hover-lift transition-all ${
+                    c.unread > 0 ? "ring-1 ring-primary/30 bg-primary/[0.03]" : ""
+                  }`}
                 >
                   <img
                     src={g?.images[0] ?? "/placeholder.svg"}
@@ -63,22 +65,24 @@ export default function ChatList() {
                   />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-baseline justify-between gap-2">
-                      <h3 className="font-bold truncate">{c.title}</h3>
+                      <h3 className={`truncate ${c.unread > 0 ? "font-extrabold" : "font-bold"}`}>
+                        {c.title}
+                      </h3>
                       {c.lastMessage && (
                         <span className="text-[10px] text-muted-foreground shrink-0">
                           {timeAgo(c.lastMessage.createdAt)}
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-muted-foreground truncate">
+                    <p className={`text-xs truncate ${c.unread > 0 ? "text-foreground font-medium" : "text-muted-foreground"}`}>
                       {c.lastMessage
                         ? `${c.lastMessage.senderName}: ${c.lastMessage.text}`
                         : "ابدأ الحوار..."}
                     </p>
                   </div>
                   {c.unread ? (
-                    <span className="w-5 h-5 rounded-full bg-accent text-accent-foreground text-[10px] font-bold flex items-center justify-center">
-                      {c.unread}
+                    <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-accent text-accent-foreground text-[10px] font-bold flex items-center justify-center animate-bounce-in">
+                      {c.unread > 99 ? "99+" : c.unread}
                     </span>
                   ) : null}
                 </Link>
@@ -98,17 +102,33 @@ export default function ChatList() {
                 <Link
                   key={c.id}
                   to={`/chats/${c.id}`}
-                  className="surface-card p-3 flex items-center gap-3 hover:shadow-elevated transition-shadow"
+                  className={`surface-card p-3 flex items-center gap-3 hover-lift transition-all ${
+                    c.unread > 0 ? "ring-1 ring-primary/30 bg-primary/[0.03]" : ""
+                  }`}
                 >
-                  <div className="w-12 h-12 rounded-full bg-gradient-primary text-primary-foreground flex items-center justify-center font-bold shrink-0">
+                  <div className="w-12 h-12 rounded-full bg-gradient-primary text-primary-foreground flex items-center justify-center font-bold shrink-0 shadow-sm">
                     {(other?.name ?? c.title)[0]}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-bold truncate">{other?.name ?? c.title}</h3>
-                    <p className="text-xs text-muted-foreground truncate">
+                    <div className="flex items-baseline justify-between gap-2">
+                      <h3 className={`truncate ${c.unread > 0 ? "font-extrabold" : "font-bold"}`}>
+                        {other?.name ?? c.title}
+                      </h3>
+                      {c.lastMessage && (
+                        <span className="text-[10px] text-muted-foreground shrink-0">
+                          {timeAgo(c.lastMessage.createdAt)}
+                        </span>
+                      )}
+                    </div>
+                    <p className={`text-xs truncate ${c.unread > 0 ? "text-foreground font-medium" : "text-muted-foreground"}`}>
                       {c.lastMessage?.text ?? "محادثة جديدة"}
                     </p>
                   </div>
+                  {c.unread ? (
+                    <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-accent text-accent-foreground text-[10px] font-bold flex items-center justify-center animate-bounce-in">
+                      {c.unread > 99 ? "99+" : c.unread}
+                    </span>
+                  ) : null}
                 </Link>
               );
             })
@@ -121,9 +141,14 @@ export default function ChatList() {
 
 function Empty() {
   return (
-    <div className="surface-card p-12 text-center">
-      <MessageCircle className="w-10 h-10 mx-auto text-muted-foreground/40 mb-3" />
-      <p className="text-muted-foreground text-sm">لا توجد محادثات</p>
+    <div className="surface-card p-12 text-center animate-fade-in-up">
+      <div className="w-14 h-14 rounded-2xl bg-muted/70 flex items-center justify-center mx-auto mb-3">
+        <MessageCircle className="w-7 h-7 text-muted-foreground/60" />
+      </div>
+      <h3 className="font-bold mb-1">لا توجد محادثات بعد</h3>
+      <p className="text-muted-foreground text-sm">
+        ستظهر هنا محادثات المجموعات التي تنضم لها أو الرسائل المباشرة مع المنظِّمين.
+      </p>
     </div>
   );
 }

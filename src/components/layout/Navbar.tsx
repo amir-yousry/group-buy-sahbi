@@ -8,7 +8,7 @@ import {
   ChevronDown,
   Settings2,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth, useAllUsers } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,7 +21,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { VerifiedBadge } from "@/components/shared/VerifiedBadge";
-import { resetMockStore } from "@/lib/mock-store";
+import { resetMockStore, getConversationsForUser, getUnreadCount } from "@/lib/mock-store";
+
 
 export function Navbar() {
   const { user, logout, switchUser, refresh } = useAuth();
@@ -29,19 +30,38 @@ export function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const [unreadTotal, setUnreadTotal] = useState(0);
+
+  // Recompute unread on user/route change + poll lightly while mounted
+  useEffect(() => {
+    if (!user) {
+      setUnreadTotal(0);
+      return;
+    }
+    const compute = () => {
+      const total = getConversationsForUser(user.id).reduce(
+        (sum, c) => sum + getUnreadCount(c.id, user.id),
+        0
+      );
+      setUnreadTotal(total);
+    };
+    compute();
+    const i = setInterval(compute, 3000);
+    return () => clearInterval(i);
+  }, [user, location.pathname]);
 
   const isOrganizer = user?.role === "organizer" && user.kycStatus === "approved";
 
   const navItems = isOrganizer
     ? [
-        { to: "/dashboard", label: "اللوحة", icon: LayoutDashboard },
-        { to: "/", label: "تصفّح", icon: Home },
-        { to: "/chats", label: "المحادثات", icon: MessageCircle },
+        { to: "/dashboard", label: "اللوحة", icon: LayoutDashboard, badge: 0 },
+        { to: "/", label: "تصفّح", icon: Home, badge: 0 },
+        { to: "/chats", label: "المحادثات", icon: MessageCircle, badge: unreadTotal },
       ]
     : [
-        { to: "/", label: "الرئيسية", icon: Home },
-        { to: "/my-groups", label: "مجموعاتي", icon: Package },
-        { to: "/chats", label: "المحادثات", icon: MessageCircle },
+        { to: "/", label: "الرئيسية", icon: Home, badge: 0 },
+        { to: "/my-groups", label: "مجموعاتي", icon: Package, badge: 0 },
+        { to: "/chats", label: "المحادثات", icon: MessageCircle, badge: unreadTotal },
       ];
 
   const handleSwitch = (id: string) => {
@@ -80,7 +100,7 @@ export function Navbar() {
                   key={item.to}
                   to={item.to}
                   className={cn(
-                    "flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                    "relative flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200",
                     active
                       ? "bg-primary text-primary-foreground shadow-sm"
                       : "text-foreground hover:bg-muted"
@@ -88,6 +108,11 @@ export function Navbar() {
                 >
                   <item.icon className="w-4 h-4" />
                   {item.label}
+                  {item.badge > 0 && (
+                    <span className="ms-0.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold animate-bounce-in">
+                      {item.badge > 99 ? "99+" : item.badge}
+                    </span>
+                  )}
                 </Link>
               );
             })}
@@ -206,12 +231,22 @@ export function Navbar() {
                   key={item.to}
                   to={item.to}
                   className={cn(
-                    "flex flex-col items-center justify-center gap-1 text-[11px] font-medium transition-colors",
+                    "relative flex flex-col items-center justify-center gap-1 text-[11px] font-medium transition-all duration-200",
                     active ? "text-primary" : "text-muted-foreground"
                   )}
                 >
-                  <item.icon className="w-5 h-5" />
+                  <span className="relative">
+                    <item.icon className={cn("w-5 h-5 transition-transform", active && "scale-110")} />
+                    {item.badge > 0 && (
+                      <span className="absolute -top-1.5 -left-2 inline-flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-destructive text-destructive-foreground text-[9px] font-bold animate-bounce-in">
+                        {item.badge > 9 ? "9+" : item.badge}
+                      </span>
+                    )}
+                  </span>
                   {item.label}
+                  {active && (
+                    <span className="absolute top-0 inset-x-6 h-0.5 bg-primary rounded-full" />
+                  )}
                 </Link>
               );
             })}

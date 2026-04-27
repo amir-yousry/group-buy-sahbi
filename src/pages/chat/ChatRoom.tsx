@@ -111,82 +111,107 @@ export default function ChatRoom() {
       </div>
 
       {/* Messages */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto bg-muted/30">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto bg-muted/30 scroll-thin">
         <div className="container py-4 space-y-3">
           {messages.length === 0 ? (
-            <div className="text-center text-muted-foreground text-sm py-12">
+            <div className="text-center text-muted-foreground text-sm py-12 animate-fade-in-up">
+              <div className="w-14 h-14 rounded-2xl bg-background/80 flex items-center justify-center mx-auto mb-3 shadow-sm">
+                <Send className="w-6 h-6 text-muted-foreground/60 -scale-x-100" />
+              </div>
               ابدأ المحادثة الآن
             </div>
           ) : (
-            messages.map((m) => {
+            messages.map((m, idx) => {
               const mine = m.senderId === user.id;
+              const prev = messages[idx - 1];
+              const showDateSep =
+                !prev ||
+                new Date(prev.createdAt).toDateString() !==
+                  new Date(m.createdAt).toDateString();
+              const consecutive =
+                prev &&
+                prev.senderId === m.senderId &&
+                !showDateSep &&
+                new Date(m.createdAt).getTime() -
+                  new Date(prev.createdAt).getTime() <
+                  60_000;
               const recipientIds = conversation.participants.filter((p) => p !== user.id);
               const status = computeStatus(recipientIds, m.deliveredTo, m.readBy);
               const readByOthers = (m.readBy ?? []).filter((id) => id !== user.id);
               const deliveredToOthers = (m.deliveredTo ?? []).filter((id) => id !== user.id);
               const usersById = Object.fromEntries(getUsers().map((u) => [u.id, u]));
               return (
-                <div key={m.id} className={cn("flex", mine ? "justify-start" : "justify-end")}>
-                  <div className={cn("max-w-[80%] sm:max-w-[60%]", mine ? "items-start" : "items-end")}>
-                    {!mine && conversation.type === "group" && (
-                      <div className="text-[10px] text-muted-foreground mb-0.5 px-2">
-                        {m.senderName}
-                      </div>
-                    )}
-                    <div
-                      className={cn(
-                        "px-3.5 py-2 rounded-2xl text-sm leading-relaxed",
-                        mine
-                          ? "bg-primary text-primary-foreground rounded-bl-md"
-                          : "bg-card border border-border text-foreground rounded-br-md"
-                      )}
-                    >
-                      {m.text}
+                <div key={m.id}>
+                  {showDateSep && (
+                    <div className="flex items-center justify-center my-4">
+                      <span className="text-[10px] font-semibold text-muted-foreground bg-background/80 backdrop-blur-sm px-3 py-1 rounded-full border border-border">
+                        {format(new Date(m.createdAt), "d MMMM yyyy", { locale: arEG })}
+                      </span>
                     </div>
-                    <div className={cn(
-                      "text-[10px] text-muted-foreground mt-0.5 px-2 flex items-center gap-1",
-                      mine ? "justify-start" : "justify-end flex-row-reverse"
-                    )}>
-                      <span>{format(new Date(m.createdAt), "h:mm a", { locale: arEG })}</span>
-                      {mine && (
-                        conversation.type === "group" ? (
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <button type="button" className="inline-flex items-center hover:opacity-80" aria-label="تفاصيل القراءة">
-                                <MessageTicks status={status} />
-                              </button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-64 p-0" align="end">
-                              <div className="p-3 border-b border-border">
-                                <div className="text-xs font-bold text-muted-foreground mb-2">قرأها ({readByOthers.length})</div>
-                                {readByOthers.length === 0 ? (
-                                  <p className="text-xs text-muted-foreground">لا أحد بعد</p>
-                                ) : (
-                                  <ul className="space-y-1">
-                                    {readByOthers.map((uid) => (
-                                      <li key={uid} className="text-xs">{usersById[uid]?.name ?? uid}</li>
-                                    ))}
-                                  </ul>
-                                )}
-                              </div>
-                              <div className="p-3">
-                                <div className="text-xs font-bold text-muted-foreground mb-2">وصلت إلى ({deliveredToOthers.length})</div>
-                                {deliveredToOthers.length === 0 ? (
-                                  <p className="text-xs text-muted-foreground">—</p>
-                                ) : (
-                                  <ul className="space-y-1">
-                                    {deliveredToOthers.map((uid) => (
-                                      <li key={uid} className="text-xs">{usersById[uid]?.name ?? uid}</li>
-                                    ))}
-                                  </ul>
-                                )}
-                              </div>
-                            </PopoverContent>
-                          </Popover>
-                        ) : (
-                          <MessageTicks status={status} />
-                        )
+                  )}
+                  <div className={cn("flex animate-fade-in-up", mine ? "justify-start" : "justify-end", consecutive && "mt-0.5")}>
+                    <div className={cn("max-w-[80%] sm:max-w-[60%]", mine ? "items-start" : "items-end")}>
+                      {!mine && conversation.type === "group" && !consecutive && (
+                        <div className="text-[10px] text-primary font-bold mb-0.5 px-2">
+                          {m.senderName}
+                        </div>
                       )}
+                      <div
+                        className={cn(
+                          "px-3.5 py-2 rounded-2xl text-sm leading-relaxed shadow-sm",
+                          mine
+                            ? "bg-primary text-primary-foreground rounded-bl-md"
+                            : "bg-card border border-border text-foreground rounded-br-md",
+                          consecutive && (mine ? "rounded-tl-md" : "rounded-tr-md")
+                        )}
+                      >
+                        {m.text}
+                      </div>
+                      <div className={cn(
+                        "text-[10px] text-muted-foreground mt-0.5 px-2 flex items-center gap-1",
+                        mine ? "justify-start" : "justify-end flex-row-reverse"
+                      )}>
+                        <span>{format(new Date(m.createdAt), "h:mm a", { locale: arEG })}</span>
+                        {mine && (
+                          conversation.type === "group" ? (
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <button type="button" className="inline-flex items-center hover:opacity-80 focus-ring rounded" aria-label="تفاصيل القراءة">
+                                  <MessageTicks status={status} />
+                                </button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-64 p-0" align="end">
+                                <div className="p-3 border-b border-border">
+                                  <div className="text-xs font-bold text-muted-foreground mb-2">قرأها ({readByOthers.length})</div>
+                                  {readByOthers.length === 0 ? (
+                                    <p className="text-xs text-muted-foreground">لا أحد بعد</p>
+                                  ) : (
+                                    <ul className="space-y-1">
+                                      {readByOthers.map((uid) => (
+                                        <li key={uid} className="text-xs">{usersById[uid]?.name ?? uid}</li>
+                                      ))}
+                                    </ul>
+                                  )}
+                                </div>
+                                <div className="p-3">
+                                  <div className="text-xs font-bold text-muted-foreground mb-2">وصلت إلى ({deliveredToOthers.length})</div>
+                                  {deliveredToOthers.length === 0 ? (
+                                    <p className="text-xs text-muted-foreground">—</p>
+                                  ) : (
+                                    <ul className="space-y-1">
+                                      {deliveredToOthers.map((uid) => (
+                                        <li key={uid} className="text-xs">{usersById[uid]?.name ?? uid}</li>
+                                      ))}
+                                    </ul>
+                                  )}
+                                </div>
+                              </PopoverContent>
+                            </Popover>
+                          ) : (
+                            <MessageTicks status={status} />
+                          )
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>

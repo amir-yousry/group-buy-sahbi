@@ -30,19 +30,38 @@ export function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const [unreadTotal, setUnreadTotal] = useState(0);
+
+  // Recompute unread on user/route change + poll lightly while mounted
+  useEffect(() => {
+    if (!user) {
+      setUnreadTotal(0);
+      return;
+    }
+    const compute = () => {
+      const total = getConversationsForUser(user.id).reduce(
+        (sum, c) => sum + getUnreadCount(c.id, user.id),
+        0
+      );
+      setUnreadTotal(total);
+    };
+    compute();
+    const i = setInterval(compute, 3000);
+    return () => clearInterval(i);
+  }, [user, location.pathname]);
 
   const isOrganizer = user?.role === "organizer" && user.kycStatus === "approved";
 
   const navItems = isOrganizer
     ? [
-        { to: "/dashboard", label: "اللوحة", icon: LayoutDashboard },
-        { to: "/", label: "تصفّح", icon: Home },
-        { to: "/chats", label: "المحادثات", icon: MessageCircle },
+        { to: "/dashboard", label: "اللوحة", icon: LayoutDashboard, badge: 0 },
+        { to: "/", label: "تصفّح", icon: Home, badge: 0 },
+        { to: "/chats", label: "المحادثات", icon: MessageCircle, badge: unreadTotal },
       ]
     : [
-        { to: "/", label: "الرئيسية", icon: Home },
-        { to: "/my-groups", label: "مجموعاتي", icon: Package },
-        { to: "/chats", label: "المحادثات", icon: MessageCircle },
+        { to: "/", label: "الرئيسية", icon: Home, badge: 0 },
+        { to: "/my-groups", label: "مجموعاتي", icon: Package, badge: 0 },
+        { to: "/chats", label: "المحادثات", icon: MessageCircle, badge: unreadTotal },
       ];
 
   const handleSwitch = (id: string) => {

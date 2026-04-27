@@ -148,9 +148,72 @@ export default function HomeFeed() {
               className="pr-10 h-11"
             />
           </div>
-          <Button variant="outline" size="lg" className="shrink-0">
-            <SlidersHorizontal className="w-4 h-4" />
-          </Button>
+          <Popover open={filterOpen} onOpenChange={setFilterOpen}>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="lg" className="shrink-0 relative">
+                <SlidersHorizontal className="w-4 h-4" />
+                {activeFiltersCount > 0 && (
+                  <span className="absolute -top-1.5 -left-1.5 w-5 h-5 rounded-full bg-accent text-accent-foreground text-[10px] font-bold flex items-center justify-center">
+                    {activeFiltersCount}
+                  </span>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80" align="end">
+              <div className="space-y-5">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-bold">الفلاتر</h3>
+                  {activeFiltersCount > 0 && (
+                    <button
+                      type="button"
+                      onClick={resetFilters}
+                      className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
+                    >
+                      <X className="w-3 h-3" />
+                      مسح الكل
+                    </button>
+                  )}
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-sm">نطاق السعر</Label>
+                    <span className="text-xs text-muted-foreground">
+                      {formatEGP(priceRange[0])} – {formatEGP(priceRange[1])}
+                    </span>
+                  </div>
+                  <Slider
+                    min={PRICE_MIN}
+                    max={PRICE_MAX}
+                    step={50}
+                    value={priceRange}
+                    onValueChange={(v) => setPriceRange([v[0], v[1]] as [number, number])}
+                    className="py-2"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between gap-3 pt-1">
+                  <div>
+                    <Label className="text-sm">منظِّمون موثَّقون فقط</Label>
+                    <p className="text-[11px] text-muted-foreground">حسابات تم التحقق منها</p>
+                  </div>
+                  <Switch checked={verifiedOnly} onCheckedChange={setVerifiedOnly} />
+                </div>
+
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <Label className="text-sm">قاربت على الاكتمال</Label>
+                    <p className="text-[11px] text-muted-foreground">٧٠٪ من الحد الأدنى</p>
+                  </div>
+                  <Switch checked={almostThereOnly} onCheckedChange={setAlmostThereOnly} />
+                </div>
+
+                <Button className="w-full" onClick={() => setFilterOpen(false)}>
+                  عرض النتائج ({visible.length})
+                </Button>
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
 
         {/* Sort chips */}

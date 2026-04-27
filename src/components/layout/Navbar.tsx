@@ -22,7 +22,7 @@ import {
 import { cn } from "@/lib/utils";
 import { VerifiedBadge } from "@/components/shared/VerifiedBadge";
 import { resetMockStore, getConversationsForUser, getUnreadCount } from "@/lib/mock-store";
-import { useEffect as useEffectReact } from "react";
+
 
 export function Navbar() {
   const { user, logout, switchUser, refresh } = useAuth();

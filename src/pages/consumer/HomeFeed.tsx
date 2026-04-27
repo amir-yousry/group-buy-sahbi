@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Search, SlidersHorizontal, Sparkles, TrendingUp, Clock, X } from "lucide-react";
+import { Search, SlidersHorizontal, Sparkles, TrendingUp, Clock, X, ShieldCheck, Flame, PackageSearch } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -11,6 +11,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { GroupCard } from "@/components/shared/GroupCard";
+import { GroupCardSkeleton } from "@/components/shared/GroupCardSkeleton";
+import { ScrollToTop } from "@/components/shared/ScrollToTop";
 import { getGroups } from "@/lib/mock-store";
 import type { Group } from "@/lib/types";
 import { useAuth } from "@/contexts/AuthContext";

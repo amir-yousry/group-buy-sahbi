@@ -121,9 +121,14 @@ export default function ChatList() {
 
 function Empty() {
   return (
-    <div className="surface-card p-12 text-center">
-      <MessageCircle className="w-10 h-10 mx-auto text-muted-foreground/40 mb-3" />
-      <p className="text-muted-foreground text-sm">لا توجد محادثات</p>
+    <div className="surface-card p-12 text-center animate-fade-in-up">
+      <div className="w-14 h-14 rounded-2xl bg-muted/70 flex items-center justify-center mx-auto mb-3">
+        <MessageCircle className="w-7 h-7 text-muted-foreground/60" />
+      </div>
+      <h3 className="font-bold mb-1">لا توجد محادثات بعد</h3>
+      <p className="text-muted-foreground text-sm">
+        ستظهر هنا محادثات المجموعات التي تنضم لها أو الرسائل المباشرة مع المنظِّمين.
+      </p>
     </div>
   );
 }

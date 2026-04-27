@@ -10,8 +10,15 @@ import {
   getGroupById,
   getMessages,
   getUsers,
+  markConversationRead,
 } from "@/lib/mock-store";
 import { VerifiedBadge } from "@/components/shared/VerifiedBadge";
+import { MessageTicks, computeStatus } from "@/components/shared/MessageTicks";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { arEG } from "date-fns/locale";

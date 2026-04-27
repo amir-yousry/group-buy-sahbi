@@ -102,17 +102,33 @@ export default function ChatList() {
                 <Link
                   key={c.id}
                   to={`/chats/${c.id}`}
-                  className="surface-card p-3 flex items-center gap-3 hover:shadow-elevated transition-shadow"
+                  className={`surface-card p-3 flex items-center gap-3 hover-lift transition-all ${
+                    c.unread > 0 ? "ring-1 ring-primary/30 bg-primary/[0.03]" : ""
+                  }`}
                 >
-                  <div className="w-12 h-12 rounded-full bg-gradient-primary text-primary-foreground flex items-center justify-center font-bold shrink-0">
+                  <div className="w-12 h-12 rounded-full bg-gradient-primary text-primary-foreground flex items-center justify-center font-bold shrink-0 shadow-sm">
                     {(other?.name ?? c.title)[0]}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-bold truncate">{other?.name ?? c.title}</h3>
-                    <p className="text-xs text-muted-foreground truncate">
+                    <div className="flex items-baseline justify-between gap-2">
+                      <h3 className={`truncate ${c.unread > 0 ? "font-extrabold" : "font-bold"}`}>
+                        {other?.name ?? c.title}
+                      </h3>
+                      {c.lastMessage && (
+                        <span className="text-[10px] text-muted-foreground shrink-0">
+                          {timeAgo(c.lastMessage.createdAt)}
+                        </span>
+                      )}
+                    </div>
+                    <p className={`text-xs truncate ${c.unread > 0 ? "text-foreground font-medium" : "text-muted-foreground"}`}>
                       {c.lastMessage?.text ?? "محادثة جديدة"}
                     </p>
                   </div>
+                  {c.unread ? (
+                    <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-accent text-accent-foreground text-[10px] font-bold flex items-center justify-center animate-bounce-in">
+                      {c.unread > 99 ? "99+" : c.unread}
+                    </span>
+                  ) : null}
                 </Link>
               );
             })

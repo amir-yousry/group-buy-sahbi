@@ -247,14 +247,14 @@ export default function HomeFeed() {
         </div>
 
         {/* Category chips */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 -mx-4 px-4 sm:mx-0 sm:px-0">
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 no-scrollbar">
           {CATEGORIES.map((c) => (
             <button
               key={c}
               onClick={() => setCategory(c)}
-              className={`shrink-0 px-3.5 py-1.5 rounded-full text-sm font-medium transition-colors ${
+              className={`shrink-0 px-3.5 py-1.5 rounded-full text-sm font-medium transition-all duration-200 ${
                 category === c
-                  ? "bg-foreground text-background"
+                  ? "bg-foreground text-background shadow-sm scale-[1.02]"
                   : "bg-muted text-muted-foreground hover:bg-muted/70"
               }`}
             >
@@ -263,10 +263,61 @@ export default function HomeFeed() {
           ))}
         </div>
 
+        {/* Active filter chips */}
+        {activeFiltersCount > 0 && (
+          <div className="flex items-center gap-2 flex-wrap animate-fade-in-up">
+            <span className="text-xs text-muted-foreground">الفلاتر النشطة:</span>
+            {(priceRange[0] !== PRICE_MIN || priceRange[1] !== PRICE_MAX) && (
+              <FilterChip
+                label={`${formatEGP(priceRange[0])} – ${formatEGP(priceRange[1])}`}
+                onRemove={() => setPriceRange([PRICE_MIN, PRICE_MAX])}
+              />
+            )}
+            {verifiedOnly && (
+              <FilterChip
+                label="موثَّقون فقط"
+                icon={<ShieldCheck className="w-3 h-3" />}
+                onRemove={() => setVerifiedOnly(false)}
+              />
+            )}
+            {almostThereOnly && (
+              <FilterChip
+                label="قاربت على الاكتمال"
+                icon={<Flame className="w-3 h-3" />}
+                onRemove={() => setAlmostThereOnly(false)}
+              />
+            )}
+            <button
+              onClick={resetFilters}
+              className="text-xs text-muted-foreground underline-offset-2 hover:underline"
+            >
+              مسح الكل
+            </button>
+          </div>
+        )}
+
         {/* Feed */}
-        {visible.length === 0 ? (
-          <div className="text-center py-16">
-            <p className="text-muted-foreground">لا توجد مجموعات مطابقة حالياً</p>
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <GroupCardSkeleton key={i} />
+            ))}
+          </div>
+        ) : visible.length === 0 ? (
+          <div className="surface-card text-center py-16 px-6 animate-fade-in-up">
+            <div className="w-16 h-16 rounded-2xl bg-muted text-muted-foreground/60 flex items-center justify-center mx-auto mb-4">
+              <PackageSearch className="w-8 h-8" />
+            </div>
+            <h3 className="font-bold text-lg mb-1">لا توجد مجموعات مطابقة</h3>
+            <p className="text-muted-foreground text-sm mb-5 max-w-sm mx-auto">
+              جرّب توسيع نطاق السعر أو إزالة بعض الفلاتر للعثور على صفقات أخرى.
+            </p>
+            {activeFiltersCount > 0 && (
+              <Button variant="outline" onClick={resetFilters}>
+                <X className="w-4 h-4 ml-2" />
+                مسح كل الفلاتر
+              </Button>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 animate-fade-in-up">
@@ -276,6 +327,8 @@ export default function HomeFeed() {
           </div>
         )}
       </section>
+
+      <ScrollToTop />
     </div>
   );
 }

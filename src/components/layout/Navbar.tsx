@@ -231,12 +231,22 @@ export function Navbar() {
                   key={item.to}
                   to={item.to}
                   className={cn(
-                    "flex flex-col items-center justify-center gap-1 text-[11px] font-medium transition-colors",
+                    "relative flex flex-col items-center justify-center gap-1 text-[11px] font-medium transition-all duration-200",
                     active ? "text-primary" : "text-muted-foreground"
                   )}
                 >
-                  <item.icon className="w-5 h-5" />
+                  <span className="relative">
+                    <item.icon className={cn("w-5 h-5 transition-transform", active && "scale-110")} />
+                    {item.badge > 0 && (
+                      <span className="absolute -top-1.5 -left-2 inline-flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-destructive text-destructive-foreground text-[9px] font-bold animate-bounce-in">
+                        {item.badge > 9 ? "9+" : item.badge}
+                      </span>
+                    )}
+                  </span>
                   {item.label}
+                  {active && (
+                    <span className="absolute top-0 inset-x-6 h-0.5 bg-primary rounded-full" />
+                  )}
                 </Link>
               );
             })}

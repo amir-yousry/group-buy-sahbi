@@ -1,13 +1,22 @@
 import { useEffect, useMemo, useState } from "react";
-import { Search, SlidersHorizontal, Sparkles, TrendingUp, Clock } from "lucide-react";
+import { Search, SlidersHorizontal, Sparkles, TrendingUp, Clock, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { GroupCard } from "@/components/shared/GroupCard";
 import { getGroups } from "@/lib/mock-store";
 import type { Group } from "@/lib/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
 import { getUsers } from "@/lib/mock-store";
+import { formatEGP } from "@/lib/format";
 
 type SortMode = "ending-soon" | "highest-rated" | "newest";
 

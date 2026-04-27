@@ -22,12 +22,21 @@ type SortMode = "ending-soon" | "highest-rated" | "newest";
 
 const CATEGORIES = ["الكل", "بقالة", "إلكترونيات", "ملابس"];
 
+const PRICE_MIN = 0;
+const PRICE_MAX = 10000;
+
 export default function HomeFeed() {
   const { user } = useAuth();
   const [groups, setGroups] = useState<Group[]>([]);
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<SortMode>("ending-soon");
   const [category, setCategory] = useState("الكل");
+
+  // Advanced filters
+  const [priceRange, setPriceRange] = useState<[number, number]>([PRICE_MIN, PRICE_MAX]);
+  const [verifiedOnly, setVerifiedOnly] = useState(false);
+  const [almostThereOnly, setAlmostThereOnly] = useState(false);
+  const [filterOpen, setFilterOpen] = useState(false);
 
   useEffect(() => {
     setGroups(getGroups());
@@ -37,6 +46,17 @@ export default function HomeFeed() {
     return Object.fromEntries(getUsers().map((u) => [u.id, u]));
   }, []);
 
+  const activeFiltersCount =
+    (priceRange[0] !== PRICE_MIN || priceRange[1] !== PRICE_MAX ? 1 : 0) +
+    (verifiedOnly ? 1 : 0) +
+    (almostThereOnly ? 1 : 0);
+
+  const resetFilters = () => {
+    setPriceRange([PRICE_MIN, PRICE_MAX]);
+    setVerifiedOnly(false);
+    setAlmostThereOnly(false);
+  };
+
   const visible = useMemo(() => {
     let list = groups.filter((g) => g.status === "active");
     if (search.trim())
@@ -44,6 +64,25 @@ export default function HomeFeed() {
         g.title.toLowerCase().includes(search.trim().toLowerCase())
       );
     if (category !== "الكل") list = list.filter((g) => g.category === category);
+
+    // Price filter
+    list = list.filter(
+      (g) => g.groupPrice >= priceRange[0] && g.groupPrice <= priceRange[1]
+    );
+
+    // Verified organizer only
+    if (verifiedOnly) {
+      list = list.filter((g) => usersById[g.organizerId]?.kycStatus === "approved");
+    }
+
+    // Almost full (>= 70% of min buyers reached)
+    if (almostThereOnly) {
+      list = list.filter((g) => {
+        const approved = g.members.filter((m) => m.status === "approved").length;
+        return approved / Math.max(1, g.minBuyers) >= 0.7;
+      });
+    }
+
     if (sort === "ending-soon")
       list = [...list].sort(
         (a, b) => new Date(a.expiresAt).getTime() - new Date(b.expiresAt).getTime()
@@ -59,7 +98,7 @@ export default function HomeFeed() {
         (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
     return list;
-  }, [groups, search, category, sort, usersById]);
+  }, [groups, search, category, sort, usersById, priceRange, verifiedOnly, almostThereOnly]);
 
   return (
     <div>

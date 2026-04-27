@@ -7,7 +7,7 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
-import { getConversationsForUser, getGroupById, getUsers } from "@/lib/mock-store";
+import { getConversationsForUser, getGroupById, getUnreadCount, getUsers } from "@/lib/mock-store";
 import { MessageCircle, Users } from "lucide-react";
 import { timeAgo } from "@/lib/format";
 
@@ -15,7 +15,13 @@ export default function ChatList() {
   const { user } = useAuth();
   const [tab, setTab] = useState<"group" | "direct">("group");
 
-  const conversations = useMemo(() => (user ? getConversationsForUser(user.id) : []), [user]);
+  const conversations = useMemo(() => {
+    if (!user) return [];
+    return getConversationsForUser(user.id).map((c) => ({
+      ...c,
+      unread: getUnreadCount(c.id, user.id),
+    }));
+  }, [user]);
   const groups = conversations.filter((c) => c.type === "group");
   const directs = conversations.filter((c) => c.type === "direct");
 

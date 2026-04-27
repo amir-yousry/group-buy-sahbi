@@ -149,13 +149,52 @@ export function getMessages(conversationId: string): ChatMessage[] {
 }
 export function addMessage(m: ChatMessage) {
   const all = read<ChatMessage[]>(KEYS.messages, MOCK_MESSAGES);
-  write(KEYS.messages, [...all, m]);
+  // Simulate "delivered" to all other participants instantly (mock backend).
+  const conv = getConversations().find((c) => c.id === m.conversationId);
+  const recipients = (conv?.participants ?? []).filter((p) => p !== m.senderId);
+  const enriched: ChatMessage = {
+    ...m,
+    deliveredTo: Array.from(new Set([...(m.deliveredTo ?? []), ...recipients])),
+    readBy: m.readBy ?? [],
+  };
+  write(KEYS.messages, [...all, enriched]);
 
   // update last message on conversation
   const convs = getConversations().map((c) =>
-    c.id === m.conversationId ? { ...c, lastMessage: m } : c
+    c.id === m.conversationId ? { ...c, lastMessage: enriched } : c
   );
   saveConversations(convs);
+}
+
+// Mark every message in a conversation as read by `userId` (excluding own messages).
+// Returns true if anything changed.
+export function markConversationRead(conversationId: string, userId: string): boolean {
+  const all = read<ChatMessage[]>(KEYS.messages, MOCK_MESSAGES);
+  let changed = false;
+  const next = all.map((m) => {
+    if (m.conversationId !== conversationId) return m;
+    if (m.senderId === userId) return m;
+    const readBy = m.readBy ?? [];
+    const deliveredTo = m.deliveredTo ?? [];
+    const newRead = readBy.includes(userId) ? readBy : [...readBy, userId];
+    const newDelivered = deliveredTo.includes(userId) ? deliveredTo : [...deliveredTo, userId];
+    if (newRead === readBy && newDelivered === deliveredTo) return m;
+    changed = true;
+    return { ...m, readBy: newRead, deliveredTo: newDelivered };
+  });
+  if (changed) write(KEYS.messages, next);
+  return changed;
+}
+
+// Compute unread count for a user in a conversation
+export function getUnreadCount(conversationId: string, userId: string): number {
+  const all = read<ChatMessage[]>(KEYS.messages, MOCK_MESSAGES);
+  return all.filter(
+    (m) =>
+      m.conversationId === conversationId &&
+      m.senderId !== userId &&
+      !(m.readBy ?? []).includes(userId)
+  ).length;
 }
 export function ensureDirectConversation(params: {
   userA: string;

@@ -66,6 +66,9 @@ export interface ChatMessage {
   senderName: string;
   text: string;
   createdAt: string;
+  // WhatsApp-like receipts: list of user ids who have received / read
+  deliveredTo?: string[];
+  readBy?: string[];
 }
 
 export type ConversationType = "group" | "direct";

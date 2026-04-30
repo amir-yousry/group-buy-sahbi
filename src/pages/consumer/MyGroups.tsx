@@ -60,7 +60,7 @@ export default function MyGroups() {
       </div>
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as TabKey)}>
-        <TabsList className="grid w-full grid-cols-3 mb-5">
+        <TabsList className="grid w-full grid-cols-4 mb-5">
           <TabsTrigger value="active">
             النشطة {buckets.active.length > 0 && `(${buckets.active.length})`}
           </TabsTrigger>
@@ -69,6 +69,10 @@ export default function MyGroups() {
           </TabsTrigger>
           <TabsTrigger value="closed">
             المنتهية {buckets.closed.length > 0 && `(${buckets.closed.length})`}
+          </TabsTrigger>
+          <TabsTrigger value="favorites" className="gap-1">
+            <Heart className="w-3.5 h-3.5" />
+            المفضلة {favorites.length > 0 && `(${favorites.length})`}
           </TabsTrigger>
         </TabsList>
 

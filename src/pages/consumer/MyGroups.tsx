@@ -7,16 +7,17 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
-import { getGroupsForConsumer } from "@/lib/mock-store";
+import { getFavoriteGroups, getGroupsForConsumer } from "@/lib/mock-store";
 import { Countdown } from "@/components/shared/Countdown";
 import { ProgressBar } from "@/components/shared/ProgressBar";
 import { GroupStatusBadge, MemberStatusBadge } from "@/components/shared/StatusBadge";
 import { formatEGP } from "@/lib/format";
-import { Package } from "lucide-react";
+import { Heart, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LeaveReviewModal } from "@/components/shared/LeaveReviewModal";
+import { GroupCard } from "@/components/shared/GroupCard";
 
-type TabKey = "active" | "pending" | "closed";
+type TabKey = "active" | "pending" | "closed" | "favorites";
 
 export default function MyGroups() {
   const { user } = useAuth();

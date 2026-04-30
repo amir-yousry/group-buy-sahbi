@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Search, SlidersHorizontal, Sparkles, TrendingUp, Clock, X, ShieldCheck, Flame, PackageSearch } from "lucide-react";
+import { Search, SlidersHorizontal, Sparkles, TrendingUp, Clock, X, ShieldCheck, Flame, PackageSearch, Tag, Percent, RotateCcw } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -23,9 +23,11 @@ import { formatEGP } from "@/lib/format";
 type SortMode = "ending-soon" | "highest-rated" | "newest";
 
 const CATEGORIES = ["الكل", "بقالة", "إلكترونيات", "ملابس"];
+const SELECTABLE_CATEGORIES = ["بقالة", "إلكترونيات", "ملابس"];
 
 const PRICE_MIN = 0;
 const PRICE_MAX = 10000;
+const DEFAULT_SORT: SortMode = "ending-soon";
 
 export default function HomeFeed() {
   const { user } = useAuth();
@@ -37,6 +39,8 @@ export default function HomeFeed() {
 
   // Advanced filters
   const [priceRange, setPriceRange] = useState<[number, number]>([PRICE_MIN, PRICE_MAX]);
+  const [minDiscount, setMinDiscount] = useState(0); // %
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [almostThereOnly, setAlmostThereOnly] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
@@ -56,13 +60,36 @@ export default function HomeFeed() {
 
   const activeFiltersCount =
     (priceRange[0] !== PRICE_MIN || priceRange[1] !== PRICE_MAX ? 1 : 0) +
+    (minDiscount > 0 ? 1 : 0) +
+    (selectedCategories.length > 0 ? 1 : 0) +
     (verifiedOnly ? 1 : 0) +
     (almostThereOnly ? 1 : 0);
 
+  const totalActiveCount =
+    activeFiltersCount +
+    (category !== "الكل" ? 1 : 0) +
+    (search.trim() ? 1 : 0) +
+    (sort !== DEFAULT_SORT ? 1 : 0);
+
   const resetFilters = () => {
     setPriceRange([PRICE_MIN, PRICE_MAX]);
+    setMinDiscount(0);
+    setSelectedCategories([]);
     setVerifiedOnly(false);
     setAlmostThereOnly(false);
+  };
+
+  const resetAll = () => {
+    resetFilters();
+    setCategory("الكل");
+    setSearch("");
+    setSort(DEFAULT_SORT);
+  };
+
+  const toggleCategoryFilter = (c: string) => {
+    setSelectedCategories((prev) =>
+      prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]
+    );
   };
 
   const visible = useMemo(() => {
@@ -76,10 +103,24 @@ export default function HomeFeed() {
       );
     if (category !== "الكل") list = list.filter((g) => g.category === category);
 
+    // Multi-select category filter (popover)
+    if (selectedCategories.length > 0) {
+      list = list.filter((g) => g.category && selectedCategories.includes(g.category));
+    }
+
     // Price filter
     list = list.filter(
       (g) => g.groupPrice >= priceRange[0] && g.groupPrice <= priceRange[1]
     );
+
+    // Minimum discount filter
+    if (minDiscount > 0) {
+      list = list.filter((g) => {
+        if (!g.originalPrice || g.originalPrice <= 0) return false;
+        const d = ((g.originalPrice - g.groupPrice) / g.originalPrice) * 100;
+        return d >= minDiscount;
+      });
+    }
 
     // Verified organizer only
     if (verifiedOnly) {
@@ -109,7 +150,7 @@ export default function HomeFeed() {
         (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
     return list;
-  }, [groups, search, category, sort, usersById, priceRange, verifiedOnly, almostThereOnly]);
+  }, [groups, search, category, sort, usersById, priceRange, minDiscount, selectedCategories, verifiedOnly, almostThereOnly]);
 
   return (
     <div>
@@ -177,20 +218,46 @@ export default function HomeFeed() {
                 )}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-80" align="end">
+            <PopoverContent className="w-[22rem] max-h-[calc(100vh-5rem)] overflow-y-auto" align="end">
               <div className="space-y-5">
                 <div className="flex items-center justify-between">
                   <h3 className="font-bold">الفلاتر</h3>
-                  {activeFiltersCount > 0 && (
-                    <button
-                      type="button"
-                      onClick={resetFilters}
-                      className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
-                    >
-                      <X className="w-3 h-3" />
-                      مسح الكل
-                    </button>
-                  )}
+                  <button
+                    type="button"
+                    onClick={resetFilters}
+                    disabled={activeFiltersCount === 0}
+                    className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1 disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    <RotateCcw className="w-3 h-3" />
+                    إعادة الضبط
+                  </button>
+                </div>
+
+                {/* Category multi-select */}
+                <div className="space-y-2">
+                  <Label className="text-sm inline-flex items-center gap-1.5">
+                    <Tag className="w-3.5 h-3.5" />
+                    الفئات
+                  </Label>
+                  <div className="flex flex-wrap gap-2">
+                    {SELECTABLE_CATEGORIES.map((c) => {
+                      const active = selectedCategories.includes(c);
+                      return (
+                        <button
+                          key={c}
+                          type="button"
+                          onClick={() => toggleCategoryFilter(c)}
+                          className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${
+                            active
+                              ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                              : "bg-card text-foreground border-border hover:border-primary/50"
+                          }`}
+                        >
+                          {c}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
 
                 <div className="space-y-3">
@@ -206,6 +273,27 @@ export default function HomeFeed() {
                     step={50}
                     value={priceRange}
                     onValueChange={(v) => setPriceRange([v[0], v[1]] as [number, number])}
+                    className="py-2"
+                  />
+                </div>
+
+                {/* Min discount */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-sm inline-flex items-center gap-1.5">
+                      <Percent className="w-3.5 h-3.5" />
+                      الحد الأدنى للخصم
+                    </Label>
+                    <span className="text-xs text-muted-foreground">
+                      {minDiscount > 0 ? `${minDiscount}٪ فأكثر` : "بدون"}
+                    </span>
+                  </div>
+                  <Slider
+                    min={0}
+                    max={70}
+                    step={5}
+                    value={[minDiscount]}
+                    onValueChange={(v) => setMinDiscount(v[0] ?? 0)}
                     className="py-2"
                   />
                 </div>
@@ -274,13 +362,28 @@ export default function HomeFeed() {
         </div>
 
         {/* Active filter chips */}
-        {activeFiltersCount > 0 && (
+        {totalActiveCount > 0 && (
           <div className="flex items-center gap-2 flex-wrap animate-fade-in-up">
             <span className="text-xs text-muted-foreground">الفلاتر النشطة:</span>
+            {selectedCategories.map((c) => (
+              <FilterChip
+                key={c}
+                label={c}
+                icon={<Tag className="w-3 h-3" />}
+                onRemove={() => toggleCategoryFilter(c)}
+              />
+            ))}
             {(priceRange[0] !== PRICE_MIN || priceRange[1] !== PRICE_MAX) && (
               <FilterChip
                 label={`${formatEGP(priceRange[0])} – ${formatEGP(priceRange[1])}`}
                 onRemove={() => setPriceRange([PRICE_MIN, PRICE_MAX])}
+              />
+            )}
+            {minDiscount > 0 && (
+              <FilterChip
+                label={`خصم ${minDiscount}٪+`}
+                icon={<Percent className="w-3 h-3" />}
+                onRemove={() => setMinDiscount(0)}
               />
             )}
             {verifiedOnly && (
@@ -298,10 +401,11 @@ export default function HomeFeed() {
               />
             )}
             <button
-              onClick={resetFilters}
-              className="text-xs text-muted-foreground underline-offset-2 hover:underline"
+              onClick={resetAll}
+              className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground underline-offset-2 hover:underline"
             >
-              مسح الكل
+              <RotateCcw className="w-3 h-3" />
+              إعادة ضبط الكل
             </button>
           </div>
         )}
@@ -322,10 +426,10 @@ export default function HomeFeed() {
             <p className="text-muted-foreground text-sm mb-5 max-w-sm mx-auto">
               جرّب توسيع نطاق السعر أو إزالة بعض الفلاتر للعثور على صفقات أخرى.
             </p>
-            {activeFiltersCount > 0 && (
-              <Button variant="outline" onClick={resetFilters}>
-                <X className="w-4 h-4 ml-2" />
-                مسح كل الفلاتر
+            {totalActiveCount > 0 && (
+              <Button variant="outline" onClick={resetAll}>
+                <RotateCcw className="w-4 h-4 ml-2" />
+                إعادة ضبط جميع الفلاتر
               </Button>
             )}
           </div>

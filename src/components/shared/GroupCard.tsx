@@ -66,6 +66,30 @@ export function GroupCard({ group, onFavoriteChange }: GroupCardProps) {
           </div>
         )}
 
+        {/* Quick actions */}
+        <div className="absolute top-2 right-12 flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={handleFav}
+            aria-label={fav ? "إزالة من المفضلة" : "حفظ في المفضلة"}
+            className="w-8 h-8 rounded-full bg-background/90 backdrop-blur-sm shadow-sm flex items-center justify-center hover:scale-110 transition-transform"
+          >
+            <Heart
+              className={`w-4 h-4 transition-all ${
+                fav ? "fill-destructive text-destructive" : "text-foreground"
+              }`}
+            />
+          </button>
+          <button
+            type="button"
+            onClick={handleShare}
+            aria-label="مشاركة"
+            className="w-8 h-8 rounded-full bg-background/90 backdrop-blur-sm shadow-sm flex items-center justify-center hover:scale-110 transition-transform"
+          >
+            <Share2 className="w-4 h-4 text-foreground" />
+          </button>
+        </div>
+
         {/* Bottom badges */}
         <div className="absolute bottom-3 inset-x-3 flex items-end justify-between gap-2">
           {group.category && (

@@ -1,20 +1,29 @@
 import { Link } from "react-router-dom";
-import { Users, Flame, ImageIcon } from "lucide-react";
-import { useState } from "react";
+import { Users, Flame, ImageIcon, Heart, Share2 } from "lucide-react";
+import { useState, useEffect } from "react";
 import type { Group } from "@/lib/types";
 import { ProgressBar } from "./ProgressBar";
 import { Countdown } from "./Countdown";
 import { StarRating } from "./StarRating";
 import { VerifiedBadge } from "./VerifiedBadge";
 import { formatEGP, arabicNumber } from "@/lib/format";
-import { getUsers } from "@/lib/mock-store";
+import { getUsers, isFavorite, toggleFavorite } from "@/lib/mock-store";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 interface GroupCardProps {
   group: Group;
+  onFavoriteChange?: () => void;
 }
 
-export function GroupCard({ group }: GroupCardProps) {
+export function GroupCard({ group, onFavoriteChange }: GroupCardProps) {
+  const { user } = useAuth();
   const [imgLoaded, setImgLoaded] = useState(false);
+  const [fav, setFav] = useState(false);
+
+  useEffect(() => {
+    if (user) setFav(isFavorite(user.id, group.id));
+  }, [user, group.id]);
   const organizer = getUsers().find((u) => u.id === group.organizerId);
   const approvedCount = group.members.filter((m) => m.status === "approved").length;
   const discount = group.originalPrice

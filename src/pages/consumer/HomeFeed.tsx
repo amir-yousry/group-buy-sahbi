@@ -218,20 +218,46 @@ export default function HomeFeed() {
                 )}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-80" align="end">
+            <PopoverContent className="w-[22rem] max-h-[calc(100vh-5rem)] overflow-y-auto" align="end">
               <div className="space-y-5">
                 <div className="flex items-center justify-between">
                   <h3 className="font-bold">الفلاتر</h3>
-                  {activeFiltersCount > 0 && (
-                    <button
-                      type="button"
-                      onClick={resetFilters}
-                      className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
-                    >
-                      <X className="w-3 h-3" />
-                      مسح الكل
-                    </button>
-                  )}
+                  <button
+                    type="button"
+                    onClick={resetFilters}
+                    disabled={activeFiltersCount === 0}
+                    className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1 disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    <RotateCcw className="w-3 h-3" />
+                    إعادة الضبط
+                  </button>
+                </div>
+
+                {/* Category multi-select */}
+                <div className="space-y-2">
+                  <Label className="text-sm inline-flex items-center gap-1.5">
+                    <Tag className="w-3.5 h-3.5" />
+                    الفئات
+                  </Label>
+                  <div className="flex flex-wrap gap-2">
+                    {SELECTABLE_CATEGORIES.map((c) => {
+                      const active = selectedCategories.includes(c);
+                      return (
+                        <button
+                          key={c}
+                          type="button"
+                          onClick={() => toggleCategoryFilter(c)}
+                          className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${
+                            active
+                              ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                              : "bg-card text-foreground border-border hover:border-primary/50"
+                          }`}
+                        >
+                          {c}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
 
                 <div className="space-y-3">
@@ -247,6 +273,27 @@ export default function HomeFeed() {
                     step={50}
                     value={priceRange}
                     onValueChange={(v) => setPriceRange([v[0], v[1]] as [number, number])}
+                    className="py-2"
+                  />
+                </div>
+
+                {/* Min discount */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-sm inline-flex items-center gap-1.5">
+                      <Percent className="w-3.5 h-3.5" />
+                      الحد الأدنى للخصم
+                    </Label>
+                    <span className="text-xs text-muted-foreground">
+                      {minDiscount > 0 ? `${minDiscount}٪ فأكثر` : "بدون"}
+                    </span>
+                  </div>
+                  <Slider
+                    min={0}
+                    max={70}
+                    step={5}
+                    value={[minDiscount]}
+                    onValueChange={(v) => setMinDiscount(v[0] ?? 0)}
                     className="py-2"
                   />
                 </div>

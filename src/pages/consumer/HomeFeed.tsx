@@ -66,7 +66,10 @@ export default function HomeFeed() {
   };
 
   const visible = useMemo(() => {
-    let list = groups.filter((g) => g.status === "active");
+    const now = Date.now();
+    let list = groups.filter(
+      (g) => g.status === "active" && new Date(g.expiresAt).getTime() > now
+    );
     if (search.trim())
       list = list.filter((g) =>
         g.title.toLowerCase().includes(search.trim().toLowerCase())

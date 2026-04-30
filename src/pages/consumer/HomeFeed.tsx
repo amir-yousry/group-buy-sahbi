@@ -426,10 +426,10 @@ export default function HomeFeed() {
             <p className="text-muted-foreground text-sm mb-5 max-w-sm mx-auto">
               جرّب توسيع نطاق السعر أو إزالة بعض الفلاتر للعثور على صفقات أخرى.
             </p>
-            {activeFiltersCount > 0 && (
-              <Button variant="outline" onClick={resetFilters}>
-                <X className="w-4 h-4 ml-2" />
-                مسح كل الفلاتر
+            {totalActiveCount > 0 && (
+              <Button variant="outline" onClick={resetAll}>
+                <RotateCcw className="w-4 h-4 ml-2" />
+                إعادة ضبط جميع الفلاتر
               </Button>
             )}
           </div>

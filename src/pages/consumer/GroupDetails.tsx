@@ -295,7 +295,7 @@ export default function GroupDetails() {
       {/* Floating chat button */}
       <button
         onClick={onChatClick}
-        className="fixed bottom-24 md:bottom-8 left-4 z-30 w-14 h-14 rounded-full bg-primary text-primary-foreground shadow-elevated flex items-center justify-center hover:scale-105 transition-transform"
+        className="fixed bottom-24 md:bottom-8 left-4 z-30 w-14 h-14 rounded-full bg-primary text-primary-foreground shadow-elevated flex items-center justify-center hover:scale-105 transition-transform my-0"
         title={myMembership?.status === "approved" ? "محادثة المجموعة" : "محادثة المنظِّم"}
       >
         <MessageCircle className="w-6 h-6" />

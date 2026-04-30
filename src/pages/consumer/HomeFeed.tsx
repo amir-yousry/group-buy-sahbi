@@ -103,10 +103,24 @@ export default function HomeFeed() {
       );
     if (category !== "الكل") list = list.filter((g) => g.category === category);
 
+    // Multi-select category filter (popover)
+    if (selectedCategories.length > 0) {
+      list = list.filter((g) => g.category && selectedCategories.includes(g.category));
+    }
+
     // Price filter
     list = list.filter(
       (g) => g.groupPrice >= priceRange[0] && g.groupPrice <= priceRange[1]
     );
+
+    // Minimum discount filter
+    if (minDiscount > 0) {
+      list = list.filter((g) => {
+        if (!g.originalPrice || g.originalPrice <= 0) return false;
+        const d = ((g.originalPrice - g.groupPrice) / g.originalPrice) * 100;
+        return d >= minDiscount;
+      });
+    }
 
     // Verified organizer only
     if (verifiedOnly) {

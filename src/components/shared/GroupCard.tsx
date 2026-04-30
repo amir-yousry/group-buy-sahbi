@@ -34,6 +34,36 @@ export function GroupCard({ group, onFavoriteChange }: GroupCardProps) {
   const spotsLeft = group.maxBuyers - approvedCount;
   const fewSpotsLeft = spotsLeft > 0 && spotsLeft <= 3;
 
+  const handleFav = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!user) {
+      toast.error("سجّل الدخول لحفظ المفضلة");
+      return;
+    }
+    const nowFav = toggleFavorite(user.id, group.id);
+    setFav(nowFav);
+    toast.success(nowFav ? "تمت إضافتها للمفضلة" : "تمت الإزالة من المفضلة");
+    onFavoriteChange?.();
+  };
+
+  const handleShare = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const url = `${window.location.origin}/group/${group.id}`;
+    const shareData = { title: group.title, text: `صفقة جماعية: ${group.title}`, url };
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(url);
+        toast.success("تم نسخ رابط المجموعة");
+      }
+    } catch {
+      // dismissed
+    }
+  };
+
   return (
     <Link
       to={`/group/${group.id}`}

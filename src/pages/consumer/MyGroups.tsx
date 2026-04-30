@@ -30,6 +30,11 @@ export default function MyGroups() {
     return getGroupsForConsumer(user.id);
   }, [user, reviewGroupId]);
 
+  const favorites = useMemo(() => {
+    if (!user) return [];
+    return getFavoriteGroups(user.id);
+  }, [user, favTick]);
+
   const buckets = useMemo(() => {
     const active: typeof myGroups = [];
     const pending: typeof myGroups = [];

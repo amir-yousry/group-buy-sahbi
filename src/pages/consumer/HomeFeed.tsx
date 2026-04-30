@@ -362,13 +362,28 @@ export default function HomeFeed() {
         </div>
 
         {/* Active filter chips */}
-        {activeFiltersCount > 0 && (
+        {totalActiveCount > 0 && (
           <div className="flex items-center gap-2 flex-wrap animate-fade-in-up">
             <span className="text-xs text-muted-foreground">الفلاتر النشطة:</span>
+            {selectedCategories.map((c) => (
+              <FilterChip
+                key={c}
+                label={c}
+                icon={<Tag className="w-3 h-3" />}
+                onRemove={() => toggleCategoryFilter(c)}
+              />
+            ))}
             {(priceRange[0] !== PRICE_MIN || priceRange[1] !== PRICE_MAX) && (
               <FilterChip
                 label={`${formatEGP(priceRange[0])} – ${formatEGP(priceRange[1])}`}
                 onRemove={() => setPriceRange([PRICE_MIN, PRICE_MAX])}
+              />
+            )}
+            {minDiscount > 0 && (
+              <FilterChip
+                label={`خصم ${minDiscount}٪+`}
+                icon={<Percent className="w-3 h-3" />}
+                onRemove={() => setMinDiscount(0)}
               />
             )}
             {verifiedOnly && (
@@ -386,10 +401,11 @@ export default function HomeFeed() {
               />
             )}
             <button
-              onClick={resetFilters}
-              className="text-xs text-muted-foreground underline-offset-2 hover:underline"
+              onClick={resetAll}
+              className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground underline-offset-2 hover:underline"
             >
-              مسح الكل
+              <RotateCcw className="w-3 h-3" />
+              إعادة ضبط الكل
             </button>
           </div>
         )}

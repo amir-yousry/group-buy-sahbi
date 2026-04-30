@@ -5,6 +5,11 @@ import type {
   Review,
   User,
 } from "./types";
+import oliveOilImg from "@/assets/products/olive-oil.jpg";
+import headphonesImg from "@/assets/products/headphones.jpg";
+import riceImg from "@/assets/products/rice.jpg";
+import kidsClothesImg from "@/assets/products/kids-clothes.jpg";
+import honeyImg from "@/assets/products/honey.jpg";
 
 // Helpers
 const daysFromNow = (d: number) =>

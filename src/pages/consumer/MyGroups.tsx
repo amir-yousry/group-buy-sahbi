@@ -23,6 +23,7 @@ export default function MyGroups() {
   const { user } = useAuth();
   const [tab, setTab] = useState<TabKey>("active");
   const [reviewGroupId, setReviewGroupId] = useState<string | null>(null);
+  const [favTick, setFavTick] = useState(0);
 
   const myGroups = useMemo(() => {
     if (!user) return [];

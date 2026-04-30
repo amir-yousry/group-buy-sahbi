@@ -134,11 +134,18 @@ export default function HomeFeed() {
                   </Button>
                 </Link>
               )}
-              <a href="#feed">
-                <Button size="lg" variant="outline" className="bg-primary-foreground/10 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/20 font-bold">
-                  تصفّح الصفقات
-                </Button>
-              </a>
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={() => {
+                  document
+                    .getElementById("feed")
+                    ?.scrollIntoView({ behavior: "smooth", block: "start" });
+                }}
+                className="bg-primary-foreground/10 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/20 font-bold"
+              >
+                تصفّح الصفقات
+              </Button>
             </div>
           </div>
         </div>

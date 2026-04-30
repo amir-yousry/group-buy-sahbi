@@ -39,6 +39,8 @@ export default function HomeFeed() {
 
   // Advanced filters
   const [priceRange, setPriceRange] = useState<[number, number]>([PRICE_MIN, PRICE_MAX]);
+  const [minDiscount, setMinDiscount] = useState(0); // %
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [almostThereOnly, setAlmostThereOnly] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
@@ -58,13 +60,36 @@ export default function HomeFeed() {
 
   const activeFiltersCount =
     (priceRange[0] !== PRICE_MIN || priceRange[1] !== PRICE_MAX ? 1 : 0) +
+    (minDiscount > 0 ? 1 : 0) +
+    (selectedCategories.length > 0 ? 1 : 0) +
     (verifiedOnly ? 1 : 0) +
     (almostThereOnly ? 1 : 0);
 
+  const totalActiveCount =
+    activeFiltersCount +
+    (category !== "الكل" ? 1 : 0) +
+    (search.trim() ? 1 : 0) +
+    (sort !== DEFAULT_SORT ? 1 : 0);
+
   const resetFilters = () => {
     setPriceRange([PRICE_MIN, PRICE_MAX]);
+    setMinDiscount(0);
+    setSelectedCategories([]);
     setVerifiedOnly(false);
     setAlmostThereOnly(false);
+  };
+
+  const resetAll = () => {
+    resetFilters();
+    setCategory("الكل");
+    setSearch("");
+    setSort(DEFAULT_SORT);
+  };
+
+  const toggleCategoryFilter = (c: string) => {
+    setSelectedCategories((prev) =>
+      prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]
+    );
   };
 
   const visible = useMemo(() => {

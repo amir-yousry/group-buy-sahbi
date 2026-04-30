@@ -77,7 +77,29 @@ export default function MyGroups() {
         </TabsList>
 
         <TabsContent value={tab} className="space-y-3">
-          {list.length === 0 ? (
+          {tab === "favorites" ? (
+            favorites.length === 0 ? (
+              <div className="text-center py-16 surface-card">
+                <Heart className="w-12 h-12 mx-auto text-muted-foreground/50 mb-3" />
+                <p className="text-muted-foreground mb-4">
+                  لم تضف أي صفقة للمفضلة بعد
+                </p>
+                <Link to="/">
+                  <Button>تصفّح الصفقات</Button>
+                </Link>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {favorites.map((g) => (
+                  <GroupCard
+                    key={g.id}
+                    group={g}
+                    onFavoriteChange={() => setFavTick((t) => t + 1)}
+                  />
+                ))}
+              </div>
+            )
+          ) : list.length === 0 ? (
             <div className="text-center py-16 surface-card">
               <Package className="w-12 h-12 mx-auto text-muted-foreground/50 mb-3" />
               <p className="text-muted-foreground mb-4">لا يوجد مجموعات في هذا القسم</p>

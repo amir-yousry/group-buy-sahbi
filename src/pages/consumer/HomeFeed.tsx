@@ -23,9 +23,11 @@ import { formatEGP } from "@/lib/format";
 type SortMode = "ending-soon" | "highest-rated" | "newest";
 
 const CATEGORIES = ["الكل", "بقالة", "إلكترونيات", "ملابس"];
+const SELECTABLE_CATEGORIES = ["بقالة", "إلكترونيات", "ملابس"];
 
 const PRICE_MIN = 0;
 const PRICE_MAX = 10000;
+const DEFAULT_SORT: SortMode = "ending-soon";
 
 export default function HomeFeed() {
   const { user } = useAuth();

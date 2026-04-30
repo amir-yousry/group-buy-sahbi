@@ -23,6 +23,8 @@ import {
   ensureGroupConversation,
   getGroupById,
   getUsers,
+  isFavorite,
+  toggleFavorite,
 } from "@/lib/mock-store";
 import { useAuth } from "@/contexts/AuthContext";
 import { formatDate, formatEGP, arabicNumber } from "@/lib/format";
@@ -42,6 +44,10 @@ export default function GroupDetails() {
     if (id) setGroup(getGroupById(id));
   };
   useEffect(refresh, [id]);
+
+  useEffect(() => {
+    if (user && id) setFavorited(isFavorite(user.id, id));
+  }, [user, id]);
 
   if (!group) {
     return (
@@ -115,8 +121,14 @@ export default function GroupDetails() {
   };
 
   const onFavorite = () => {
-    setFavorited((f) => !f);
-    toast.success(favorited ? "تمت الإزالة من المفضلة" : "تمت إضافتها للمفضلة");
+    if (!user) {
+      toast.error("سجّل الدخول لحفظ المفضلة");
+      navigate("/login");
+      return;
+    }
+    const nowFav = toggleFavorite(user.id, group.id);
+    setFavorited(nowFav);
+    toast.success(nowFav ? "تمت إضافتها للمفضلة" : "تمت الإزالة من المفضلة");
   };
 
   return (

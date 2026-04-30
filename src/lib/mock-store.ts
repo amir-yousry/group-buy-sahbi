@@ -23,6 +23,7 @@ const KEYS = {
   conversations: "gj_conversations",
   reviews: "gj_reviews",
   currentUserId: "gj_current_user",
+  favorites: "gj_favorites",
 } as const;
 
 function read<T>(key: string, fallback: T): T {
@@ -263,4 +264,34 @@ export function addReview(r: Review) {
     rating: Math.round(avg * 10) / 10,
     reviewsCount: orgReviews.length,
   });
+}
+
+// ---- Favorites (per-user, by group id) ----
+type FavMap = Record<string, string[]>;
+
+function readFavMap(): FavMap {
+  return read<FavMap>(KEYS.favorites, {});
+}
+function writeFavMap(m: FavMap) {
+  write(KEYS.favorites, m);
+}
+export function getFavorites(userId: string): string[] {
+  return readFavMap()[userId] ?? [];
+}
+export function isFavorite(userId: string, groupId: string): boolean {
+  return getFavorites(userId).includes(groupId);
+}
+export function toggleFavorite(userId: string, groupId: string): boolean {
+  const m = readFavMap();
+  const list = m[userId] ?? [];
+  const next = list.includes(groupId)
+    ? list.filter((id) => id !== groupId)
+    : [...list, groupId];
+  m[userId] = next;
+  writeFavMap(m);
+  return next.includes(groupId);
+}
+export function getFavoriteGroups(userId: string): Group[] {
+  const ids = new Set(getFavorites(userId));
+  return getGroups().filter((g) => ids.has(g.id));
 }

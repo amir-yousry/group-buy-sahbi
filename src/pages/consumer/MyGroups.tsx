@@ -7,26 +7,33 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
-import { getGroupsForConsumer } from "@/lib/mock-store";
+import { getFavoriteGroups, getGroupsForConsumer } from "@/lib/mock-store";
 import { Countdown } from "@/components/shared/Countdown";
 import { ProgressBar } from "@/components/shared/ProgressBar";
 import { GroupStatusBadge, MemberStatusBadge } from "@/components/shared/StatusBadge";
 import { formatEGP } from "@/lib/format";
-import { Package } from "lucide-react";
+import { Heart, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LeaveReviewModal } from "@/components/shared/LeaveReviewModal";
+import { GroupCard } from "@/components/shared/GroupCard";
 
-type TabKey = "active" | "pending" | "closed";
+type TabKey = "active" | "pending" | "closed" | "favorites";
 
 export default function MyGroups() {
   const { user } = useAuth();
   const [tab, setTab] = useState<TabKey>("active");
   const [reviewGroupId, setReviewGroupId] = useState<string | null>(null);
+  const [favTick, setFavTick] = useState(0);
 
   const myGroups = useMemo(() => {
     if (!user) return [];
     return getGroupsForConsumer(user.id);
   }, [user, reviewGroupId]);
+
+  const favorites = useMemo(() => {
+    if (!user) return [];
+    return getFavoriteGroups(user.id);
+  }, [user, favTick]);
 
   const buckets = useMemo(() => {
     const active: typeof myGroups = [];
@@ -53,7 +60,7 @@ export default function MyGroups() {
       </div>
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as TabKey)}>
-        <TabsList className="grid w-full grid-cols-3 mb-5">
+        <TabsList className="grid w-full grid-cols-4 mb-5">
           <TabsTrigger value="active">
             النشطة {buckets.active.length > 0 && `(${buckets.active.length})`}
           </TabsTrigger>
@@ -63,10 +70,36 @@ export default function MyGroups() {
           <TabsTrigger value="closed">
             المنتهية {buckets.closed.length > 0 && `(${buckets.closed.length})`}
           </TabsTrigger>
+          <TabsTrigger value="favorites" className="gap-1">
+            <Heart className="w-3.5 h-3.5" />
+            المفضلة {favorites.length > 0 && `(${favorites.length})`}
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value={tab} className="space-y-3">
-          {list.length === 0 ? (
+          {tab === "favorites" ? (
+            favorites.length === 0 ? (
+              <div className="text-center py-16 surface-card">
+                <Heart className="w-12 h-12 mx-auto text-muted-foreground/50 mb-3" />
+                <p className="text-muted-foreground mb-4">
+                  لم تضف أي صفقة للمفضلة بعد
+                </p>
+                <Link to="/">
+                  <Button>تصفّح الصفقات</Button>
+                </Link>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {favorites.map((g) => (
+                  <GroupCard
+                    key={g.id}
+                    group={g}
+                    onFavoriteChange={() => setFavTick((t) => t + 1)}
+                  />
+                ))}
+              </div>
+            )
+          ) : list.length === 0 ? (
             <div className="text-center py-16 surface-card">
               <Package className="w-12 h-12 mx-auto text-muted-foreground/50 mb-3" />
               <p className="text-muted-foreground mb-4">لا يوجد مجموعات في هذا القسم</p>

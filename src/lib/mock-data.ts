@@ -5,6 +5,11 @@ import type {
   Review,
   User,
 } from "./types";
+import oliveOilImg from "@/assets/products/olive-oil.jpg";
+import headphonesImg from "@/assets/products/headphones.jpg";
+import riceImg from "@/assets/products/rice.jpg";
+import kidsClothesImg from "@/assets/products/kids-clothes.jpg";
+import honeyImg from "@/assets/products/honey.jpg";
 
 // Helpers
 const daysFromNow = (d: number) =>
@@ -102,7 +107,7 @@ export const MOCK_GROUPS: Group[] = [
     title: "زيت زيتون عضوي بكر ممتاز - 1 لتر",
     description:
       "زيت زيتون عضوي بكر ممتاز معصور على البارد، مستورد من إسبانيا. عبوة زجاجية 1 لتر. جودة عالية بسعر الجملة عند تجميع 50 طلب.",
-    images: ["/placeholder.svg"],
+    images: [oliveOilImg],
     groupPrice: 180,
     originalPrice: 320,
     minBuyers: 30,
@@ -133,7 +138,7 @@ export const MOCK_GROUPS: Group[] = [
     organizerId: "u-organizer-verified",
     title: "سماعات بلوتوث لاسلكية عالية الجودة",
     description: "سماعات لاسلكية ببطارية تدوم 24 ساعة، عزل ضوضاء نشط، مع علبة شحن. ضمان سنتين.",
-    images: ["/placeholder.svg"],
+    images: [headphonesImg],
     groupPrice: 850,
     originalPrice: 1500,
     minBuyers: 20,
@@ -160,7 +165,7 @@ export const MOCK_GROUPS: Group[] = [
     organizerId: "u-organizer-2",
     title: "أرز مصري درجة أولى - شيكارة 25 كجم",
     description: "أرز مصري درجة أولى من الفلاحين مباشرة. شيكارة 25 كجم. توصيل لباب البيت بعد اكتمال المجموعة.",
-    images: ["/placeholder.svg"],
+    images: [riceImg],
     groupPrice: 720,
     originalPrice: 950,
     minBuyers: 15,
@@ -187,7 +192,7 @@ export const MOCK_GROUPS: Group[] = [
     organizerId: "u-organizer-2",
     title: "ملابس أطفال قطن مصري - باكيت 5 قطع",
     description: "ملابس أطفال قطن مصري 100%، أعمار من 1-5 سنوات. باكيت متنوع 5 قطع.",
-    images: ["/placeholder.svg"],
+    images: [kidsClothesImg],
     groupPrice: 320,
     originalPrice: 600,
     minBuyers: 25,
@@ -214,7 +219,7 @@ export const MOCK_GROUPS: Group[] = [
     organizerId: "u-organizer-verified",
     title: "عسل نحل جبلي طبيعي - 1 كجم",
     description: "عسل نحل جبلي طبيعي 100% من المنحل مباشرة. عبوة 1 كجم في برطمان زجاجي.",
-    images: ["/placeholder.svg"],
+    images: [honeyImg],
     groupPrice: 240,
     originalPrice: 400,
     minBuyers: 20,

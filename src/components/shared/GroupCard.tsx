@@ -1,20 +1,29 @@
 import { Link } from "react-router-dom";
-import { Users, Flame, ImageIcon } from "lucide-react";
-import { useState } from "react";
+import { Users, Flame, ImageIcon, Heart, Share2 } from "lucide-react";
+import { useState, useEffect } from "react";
 import type { Group } from "@/lib/types";
 import { ProgressBar } from "./ProgressBar";
 import { Countdown } from "./Countdown";
 import { StarRating } from "./StarRating";
 import { VerifiedBadge } from "./VerifiedBadge";
 import { formatEGP, arabicNumber } from "@/lib/format";
-import { getUsers } from "@/lib/mock-store";
+import { getUsers, isFavorite, toggleFavorite } from "@/lib/mock-store";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 interface GroupCardProps {
   group: Group;
+  onFavoriteChange?: () => void;
 }
 
-export function GroupCard({ group }: GroupCardProps) {
+export function GroupCard({ group, onFavoriteChange }: GroupCardProps) {
+  const { user } = useAuth();
   const [imgLoaded, setImgLoaded] = useState(false);
+  const [fav, setFav] = useState(false);
+
+  useEffect(() => {
+    if (user) setFav(isFavorite(user.id, group.id));
+  }, [user, group.id]);
   const organizer = getUsers().find((u) => u.id === group.organizerId);
   const approvedCount = group.members.filter((m) => m.status === "approved").length;
   const discount = group.originalPrice
@@ -24,6 +33,36 @@ export function GroupCard({ group }: GroupCardProps) {
   const almostThere = !reachedMin && approvedCount / group.minBuyers >= 0.7;
   const spotsLeft = group.maxBuyers - approvedCount;
   const fewSpotsLeft = spotsLeft > 0 && spotsLeft <= 3;
+
+  const handleFav = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!user) {
+      toast.error("سجّل الدخول لحفظ المفضلة");
+      return;
+    }
+    const nowFav = toggleFavorite(user.id, group.id);
+    setFav(nowFav);
+    toast.success(nowFav ? "تمت إضافتها للمفضلة" : "تمت الإزالة من المفضلة");
+    onFavoriteChange?.();
+  };
+
+  const handleShare = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const url = `${window.location.origin}/group/${group.id}`;
+    const shareData = { title: group.title, text: `صفقة جماعية: ${group.title}`, url };
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(url);
+        toast.success("تم نسخ رابط المجموعة");
+      }
+    } catch {
+      // dismissed
+    }
+  };
 
   return (
     <Link
@@ -56,6 +95,30 @@ export function GroupCard({ group }: GroupCardProps) {
             خصم {arabicNumber(discount)}%
           </div>
         )}
+
+        {/* Quick actions */}
+        <div className="absolute bottom-14 left-3 flex flex-col items-center gap-1.5">
+          <button
+            type="button"
+            onClick={handleFav}
+            aria-label={fav ? "إزالة من المفضلة" : "حفظ في المفضلة"}
+            className="w-8 h-8 rounded-full bg-background/95 backdrop-blur-sm shadow-md flex items-center justify-center hover:scale-110 transition-transform"
+          >
+            <Heart
+              className={`w-4 h-4 transition-all ${
+                fav ? "fill-destructive text-destructive" : "text-foreground"
+              }`}
+            />
+          </button>
+          <button
+            type="button"
+            onClick={handleShare}
+            aria-label="مشاركة"
+            className="w-8 h-8 rounded-full bg-background/95 backdrop-blur-sm shadow-md flex items-center justify-center hover:scale-110 transition-transform"
+          >
+            <Share2 className="w-4 h-4 text-foreground" />
+          </button>
+        </div>
 
         {/* Bottom badges */}
         <div className="absolute bottom-3 inset-x-3 flex items-end justify-between gap-2">

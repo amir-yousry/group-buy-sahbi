@@ -23,6 +23,7 @@ const KEYS = {
   conversations: "gj_conversations",
   reviews: "gj_reviews",
   currentUserId: "gj_current_user",
+  favorites: "gj_favorites",
 } as const;
 
 function read<T>(key: string, fallback: T): T {

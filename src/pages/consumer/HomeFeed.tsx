@@ -150,7 +150,7 @@ export default function HomeFeed() {
         (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
     return list;
-  }, [groups, search, category, sort, usersById, priceRange, verifiedOnly, almostThereOnly]);
+  }, [groups, search, category, sort, usersById, priceRange, minDiscount, selectedCategories, verifiedOnly, almostThereOnly]);
 
   return (
     <div>

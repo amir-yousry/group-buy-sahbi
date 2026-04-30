@@ -45,6 +45,10 @@ export default function GroupDetails() {
   };
   useEffect(refresh, [id]);
 
+  useEffect(() => {
+    if (user && id) setFavorited(isFavorite(user.id, id));
+  }, [user, id]);
+
   if (!group) {
     return (
       <div className="container py-16 text-center">
